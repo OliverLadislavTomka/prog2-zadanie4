@@ -11,6 +11,6 @@
 int main(int argc, char *argv[]) {
 
     // TODO: miesto pre implementaciu zadania.
-
+    printf("Hello World!");
     return 0;
 }
