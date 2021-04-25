@@ -110,26 +110,32 @@ void boj(Unit* zviera, Unit enemy[], int pocetNepriatelov, Dmg* vitaz){
     vypisVitaza(zviera,vitaz);
 }
 
+int nahrada(){
+
+    FILE *fptr;
+
+    return 0;
+}
 
 int gamecycle(int argc,char* argv[]){
+    int subor=0;
+    if (argc == 6) subor = nahrada();
+    if (subor != 0) return subor;
     Dmg *vitazPTR,vitaz={0, 0};
     vitazPTR = &vitaz;
     Unit *zvieraPTR,zviera= {};
     zviera=generovanieMonstra(zviera,argv);
     zvieraPTR = &zviera;
     if (zviera.type == NULL) return 1;
-    int pocetNepriatelov=atoi(argv[2]);
+    int pocetNepriatelov=strtol(argv[2],NULL,0);
     Unit enemy[pocetNepriatelov];
-    if (argc == 4) generovanieEnemy(pocetNepriatelov,enemy);
-    if (argc == 6) {
-
-    }
+    generovanieEnemy(pocetNepriatelov,enemy);
     boj(zvieraPTR,enemy,pocetNepriatelov,vitazPTR);
     return 0;
 }
 
 int main(int argc, char *argv[]) {
-    srnd(atoi(argv[3]));
+    srnd(strtol(argv[3],NULL,0));
     int c=0;
     if (c == 0) c=gamecycle(argc,argv);
     return c;
