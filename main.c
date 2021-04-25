@@ -48,18 +48,36 @@ void generovanieEnemy(int pocet,Unit enemy[]){
     }
 }
 
+int zivot(Unit enemy[],int pocetNepriatelov){
+    int c=0;
+    for(int i=0;i<pocetNepriatelov;i++) if (enemy[i].hp > 0) c++;
+    return c;
+}
+
+void vypisJednotiek(Unit zviera,Unit enemy[],int pocetNepriatelov){
+    printf("%s, ATT:%d, DEF:%d, HP:%d, LVL:%d\n", zviera.type->name, zviera.type->att, zviera.type->def, zviera.hp,zviera.level);
+    for(int i=0;i<pocetNepriatelov;i++) printf("[%d] %s, ATT:%d, DEF:%d, HP:%d, LVL:%d\n",i,enemy[i].type->name,enemy[i].type->att,enemy[i].type->def,enemy[i].hp,enemy[i].level);
+}
+
+void utokVypis(Unit zviera,Unit enemy[],int pocetNepriatelov){
+
+}
+
+void boj(Unit zviera,Unit enemy[],int pocetNepriatelov){
+    while(zivot(enemy,pocetNepriatelov) && zviera.hp>0){
+        vypisJednotiek(zviera,enemy,pocetNepriatelov);
+        utokVypis(zviera,enemy,pocetNepriatelov);
+    }
+}
 
 
 int gamecycle(int argc,char* argv[]){
     Unit zviera= generovanieMonstra(zviera,argv);
     if (zviera.type == NULL) return 1;
-    printf("%s, ATT:%d, DEF:%d, HP:%d, LVL:%d\n", zviera.type->name, zviera.type->att, zviera.type->def, zviera.hp,zviera.level);
     int pocetNepriatelov=atoi(argv[2]);
     Unit enemy[pocetNepriatelov];
-    generovanieEnemy(atoi(argv[2]),enemy);
-    for(int i=0;i<pocetNepriatelov;i++){
-        printf("[%d] %s, ATT:%d, DEF:%d, HP:%d, LVL:%d\n",i,enemy[i].type->name,enemy[i].type->att,enemy[i].type->def,enemy[i].hp,enemy[i].level);
-    }
+    generovanieEnemy(pocetNepriatelov,enemy);
+    boj(zviera,enemy,pocetNepriatelov);
     return 0;
 }
 
