@@ -30,14 +30,16 @@ Unit generovanieMonstra(Unit zviera,char *argv[]){
 }
 
 UnitType* findEnemy(UnitType *poleEnemy){
-
+    return &poleEnemy[rnd(0,ENEMY_TYPE_COUNT - 1)];
 }
 
 Unit vytvorEnemy(){
     Unit enemy;
-    UnitType* enemyType = NULL;
-
-
+    UnitType* enemyType = findEnemy(enemy_types);
+    enemy.type = enemyType;
+    enemy.hp=rnd(ENEMY_MIN_INIT_HP,ENEMY_MAX_INIT_HP);
+    enemy.level=rnd(0,UNIT_MAX_LEVEL);
+    return enemy;
 }
 
 void generovanieEnemy(int pocet,Unit enemy[]){
@@ -55,10 +57,14 @@ int gamecycle(int argc,char* argv[]){
     int pocetNepriatelov=atoi(argv[2]);
     Unit enemy[pocetNepriatelov];
     generovanieEnemy(atoi(argv[2]),enemy);
+    for(int i=0;i<pocetNepriatelov;i++){
+        printf("[%d] %s, ATT:%d, DEF:%d, HP:%d, LVL:%d\n",i,enemy[i].type->name,enemy[i].type->att,enemy[i].type->def,enemy[i].hp,enemy[i].level);
+    }
     return 0;
 }
 
 int main(int argc, char *argv[]) {
+    srnd(atoi(argv[3]));
     int c=0;
     if (c == 0) c=gamecycle(argc,argv);
     return c;
