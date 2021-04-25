@@ -8,7 +8,7 @@
 typedef struct{
     int dmgZviera;
     int dmgEnemy;
-}Vitaz;
+}Dmg;
 
 UnitType* findMonsterInDataset(UnitType *poleMonstier, char **argv){
     for (int i=0;i < MONSTER_TYPE_COUNT;i++){
@@ -42,14 +42,15 @@ Unit vytvorEnemy(){
 }
 
 void generovanieEnemy(int pocet,Unit enemy[]){
-    for(int i = 0; i < pocet; i++){
+    for(int i = 0; i < pocet; i++)
         enemy[i]=vytvorEnemy();
-    }
 }
 
 int zivot(Unit enemy[],int pocetNepriatelov){
     int c=0;
-    for(int i=0;i<pocetNepriatelov;i++) if (enemy[i].hp > 0) c++;
+    for(int i=0;i<pocetNepriatelov;i++)
+        if (enemy[i].hp > 0)
+            c++;
     return c;
 }
 
@@ -58,29 +59,28 @@ void vypisJednotiek(Unit *zviera,Unit enemy[],int pocetNepriatelov){
     for(int i=0;i<pocetNepriatelov;i++) printf("[%d] %s, ATT:%d, DEF:%d, HP:%d, LVL:%d\n",i,enemy[i].type->name,enemy[i].type->att,enemy[i].type->def,enemy[i].hp,enemy[i].level);
 }
 
-int vypocetDMG(Unit utocnik,Unit obranca){
-    return (((30+utocnik.level-obranca.level)*(100+rnd(1,utocnik.hp) + utocnik.type->att))/(100+rnd(1,obranca.hp)+obranca.type->def));
+int vypocetDMG(Unit *utocnik,Unit *obranca){
+    return (((30+utocnik->level - obranca->level)*(100+rnd(1,utocnik->hp) + utocnik->type->att))/(100+rnd(1,obranca->hp)+obranca->type->def));
 }
 
-void utokMonstra(Unit *zviera,Unit enemy[],int pocetNepriatelov,Vitaz *vitaz){
-    int najmensieHP=ENEMY_MAX_INIT_HP,indexNajmensichHP;
-    for(int i=0;i<pocetNepriatelov;i++){
+void utokMonstra(Unit *zviera, Unit enemy[], int pocetNepriatelov, Dmg *vitaz){
+    int najmensieHP=ENEMY_MAX_INIT_HP,indexNajmensichHP=0;
+    for(int i=0;i<pocetNepriatelov;i++)
         if (enemy[i].hp <najmensieHP && enemy[i].hp > 0){
             najmensieHP = enemy[i].hp;
             indexNajmensichHP =i;
         }
-    }
-    int dmg=vypocetDMG(*zviera,enemy[indexNajmensichHP]);
+    int dmg=vypocetDMG(zviera,&enemy[indexNajmensichHP]);
     printf("\n%s => %d => [%d] %s\n",zviera->type->name,dmg,indexNajmensichHP,enemy[indexNajmensichHP].type->name);
     enemy[indexNajmensichHP].hp -= dmg;
     vitaz->dmgZviera += dmg;
 }
 
 
-void utokEnemy(Unit *zviera,Unit enemy[],int pocetNepriatelov,Vitaz *vitaz){
+void utokEnemy(Unit *zviera, Unit enemy[], int pocetNepriatelov, Dmg *vitaz){
     for(int i = 0; i < pocetNepriatelov; i++){
         if (enemy[i].hp > 0 && zviera->hp > 0){
-            int dmg=vypocetDMG(enemy[i],*zviera);
+            int dmg=vypocetDMG(&enemy[i],zviera);
             printf("[%d] %s => %d => %s\n",i,enemy[i].type->name,dmg,zviera->type->name);
             zviera->hp -= dmg;
             vitaz->dmgEnemy+= dmg;
@@ -89,22 +89,22 @@ void utokEnemy(Unit *zviera,Unit enemy[],int pocetNepriatelov,Vitaz *vitaz){
     printf("\n");
 }
 
-void utokVypis(Unit *zviera,Unit enemy[],int pocetNepriatelov,Vitaz* vitaz){
+void utokVypis(Unit *zviera, Unit enemy[], int pocetNepriatelov, Dmg* vitaz){
     utokMonstra(zviera,enemy,pocetNepriatelov,vitaz);
     utokEnemy(zviera,enemy,pocetNepriatelov,vitaz);
 }
 
-void vypisVitaza(Unit* zviera, Vitaz* vitaz){
+void vypisVitaza(Unit* zviera, Dmg* vitaz){
     if (zviera->hp > 0) printf("\nWinner: %s\n",zviera->type->name);
     if (zviera->hp <= 0) printf("\nWinner: Enemy\n");
     printf("Total monster DMG: %d\nTotal enemies DMG: %d\n",vitaz->dmgZviera,vitaz->dmgEnemy);
 }
 
-void boj(Unit* zviera,Unit enemy[],int pocetNepriatelov,Vitaz* vitaz){
+void boj(Unit* zviera, Unit enemy[], int pocetNepriatelov, Dmg* vitaz){
     while(zivot(enemy,pocetNepriatelov) && zviera->hp>0){
         vypisJednotiek(zviera,enemy,pocetNepriatelov);
         utokVypis(zviera,enemy,pocetNepriatelov,vitaz);
-        if(zviera->level < 10) zviera->level++;
+        if(zviera->level < 10 && zviera->hp > 0) zviera->level++;
     }
     vypisJednotiek(zviera,enemy,pocetNepriatelov);
     vypisVitaza(zviera,vitaz);
@@ -112,7 +112,7 @@ void boj(Unit* zviera,Unit enemy[],int pocetNepriatelov,Vitaz* vitaz){
 
 
 int gamecycle(int argc,char* argv[]){
-    Vitaz *vitazPTR,vitaz={0,0};
+    Dmg *vitazPTR,vitaz={0, 0};
     vitazPTR = &vitaz;
     Unit *zvieraPTR,zviera= {};
     zviera=generovanieMonstra(zviera,argv);
@@ -121,7 +121,9 @@ int gamecycle(int argc,char* argv[]){
     int pocetNepriatelov=atoi(argv[2]);
     Unit enemy[pocetNepriatelov];
     if (argc == 4) generovanieEnemy(pocetNepriatelov,enemy);
-    //if (argc == 6)
+    if (argc == 6) {
+
+    }
     boj(zvieraPTR,enemy,pocetNepriatelov,vitazPTR);
     return 0;
 }
@@ -129,7 +131,6 @@ int gamecycle(int argc,char* argv[]){
 int main(int argc, char *argv[]) {
     srnd(atoi(argv[3]));
     int c=0;
-    //if (c == 0)
-        c=gamecycle(argc,argv);
+    if (c == 0) c=gamecycle(argc,argv);
     return c;
 }
