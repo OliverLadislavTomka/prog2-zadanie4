@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "data.h"
 #include "rng.h"
 
@@ -41,15 +42,12 @@ Unit vytvorEnemy(){
 }
 
 void generovanieEnemy(int pocet,Unit enemy[]){
-    for(int i = 0; i < pocet; i++)
-        enemy[i]=vytvorEnemy();
+    for(int i = 0; i < pocet; i++) enemy[i]=vytvorEnemy();
 }
 
 int zivot(Unit enemy[],int pocetNepriatelov){
     int c=0;
-    for(int i=0;i<pocetNepriatelov;i++)
-        if (enemy[i].hp > 0)
-            c++;
+    for(int i=0;i<pocetNepriatelov;i++) if (enemy[i].hp > 0) c++;
     return c;
 }
 
@@ -63,7 +61,7 @@ int vypocetDMG(Unit *utocnik,Unit *obranca){
 }
 
 void utokMonstra(Unit *zviera, Unit enemy[], int pocetNepriatelov, Dmg *vitaz){
-    int najmensieHP=ENEMY_MAX_INIT_HP,indexNajmensichHP=0;
+    int najmensieHP=ENEMY_MAX_INIT_HP+1,indexNajmensichHP=0;
     for(int i=0;i<pocetNepriatelov;i++)
         if (enemy[i].hp <najmensieHP && enemy[i].hp > 0){
             najmensieHP = enemy[i].hp;
@@ -95,7 +93,7 @@ void utokVypis(Unit *zviera, Unit enemy[], int pocetNepriatelov, Dmg* vitaz){
 void vypisVitaza(Unit* zviera, Dmg* vitaz){
     if (zviera->hp > 0) printf("\nWinner: %s\n",zviera->type->name);
     if (zviera->hp <= 0) printf("\nWinner: Enemy\n");
-    printf("Total monster DMG: %d\nTotal enemies DMG: %d\n",vitaz->dmgZviera,vitaz->dmgEnemy);
+    printf("Total monster DMG: %d\nTotal enemies DMG: %d",vitaz->dmgZviera,vitaz->dmgEnemy);
 }
 
 void boj(Unit* zviera, Unit enemy[], int pocetNepriatelov, Dmg* vitaz){
@@ -110,20 +108,20 @@ void boj(Unit* zviera, Unit enemy[], int pocetNepriatelov, Dmg* vitaz){
 
 int kontrola(char pocetJednotiek[]){
     int pocet=0;
-    for(int i=0;i<strlen(pocetJednotiek);i++) if (!(pocetJednotiek[i] >= '0' && pocetJednotiek[i] <= '0')) pocet++;
+    for(int i=0;i<strlen(pocetJednotiek);i++) if (!isdigit(pocetJednotiek[i])) pocet++;
     return pocet;
 }
 
-int nahrada(FILE *fptr){
+int nahradaZoSuboru(FILE *fptr){
     for(int i=0;i < ENEMY_TYPE_COUNT; i++){
         fscanf(fptr,"%s",enemy_types[i].name);
         char att[100];
         fscanf(fptr, "%s",att);
-        if (!kontrola(att)) enemy_types->att = strtol(att,NULL,0);
+        if (!kontrola(att)) enemy_types[i].att = strtol(att,NULL,0);
         if (kontrola(att)) return 3;
         char def[100];
         fscanf(fptr, "%s", def);
-        if (!kontrola(def)) enemy_types->def = strtol(def, NULL, 0);
+        if (!kontrola(def)) enemy_types[i].def = strtol(def, NULL, 0);
         if (kontrola(def)) return 3;
     }
     fclose(fptr);
@@ -134,7 +132,7 @@ int nacitanieSuboru(char * suborCesta){
     FILE *fptr;
     fptr = fopen(suborCesta,"r");
     if (fptr == NULL) return 2;
-    return nahrada(fptr);
+    return nahradaZoSuboru(fptr);
 }
 
 int gamecycle(int argc,char* argv[]){
@@ -156,7 +154,6 @@ int gamecycle(int argc,char* argv[]){
 
 int main(int argc, char *argv[]) {
     srnd(strtol(argv[3],NULL,0));
-    int c;
-    c=gamecycle(argc,argv);
+    int c=gamecycle(argc,argv);
     return c;
 }
