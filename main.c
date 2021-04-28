@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "data.h"
 #include "rng.h"
 
@@ -78,14 +77,13 @@ void utokMonstra(Unit *zviera, Unit enemy[], int pocetNepriatelov, Dmg *vitaz){
 
 
 void utokEnemy(Unit *zviera, Unit enemy[], int pocetNepriatelov, Dmg *vitaz){
-    for(int i = 0; i < pocetNepriatelov; i++){
+    for(int i = 0; i < pocetNepriatelov; i++)
         if (enemy[i].hp > 0 && zviera->hp > 0){
             int dmg=vypocetDMG(&enemy[i],zviera);
             printf("[%d] %s => %d => %s\n",i,enemy[i].type->name,dmg,zviera->type->name);
             zviera->hp -= dmg;
             vitaz->dmgEnemy+= dmg;
         }
-    }
     printf("\n");
 }
 
@@ -110,16 +108,38 @@ void boj(Unit* zviera, Unit enemy[], int pocetNepriatelov, Dmg* vitaz){
     vypisVitaza(zviera,vitaz);
 }
 
-int nahrada(){
+int kontrola(char pocetJednotiek[]){
+    int pocet=0;
+    for(int i=0;i<strlen(pocetJednotiek);i++) if (!(pocetJednotiek[i] >= '0' && pocetJednotiek[i] <= '0')) pocet++;
+    return pocet;
+}
 
-    FILE *fptr;
-
+int nahrada(FILE *fptr){
+    for(int i=0;i < ENEMY_TYPE_COUNT; i++){
+        fscanf(fptr,"%s",enemy_types[i].name);
+        char att[100];
+        fscanf(fptr, "%s",att);
+        if (!kontrola(att)) enemy_types->att = strtol(att,NULL,0);
+        if (kontrola(att)) return 3;
+        char def[100];
+        fscanf(fptr, "%s", def);
+        if (!kontrola(def)) enemy_types->def = strtol(def, NULL, 0);
+        if (kontrola(def)) return 3;
+    }
+    fclose(fptr);
     return 0;
+}
+
+int nacitanieSuboru(char * suborCesta){
+    FILE *fptr;
+    fptr = fopen(suborCesta,"r");
+    if (fptr == NULL) return 2;
+    return nahrada(fptr);
 }
 
 int gamecycle(int argc,char* argv[]){
     int subor=0;
-    if (argc == 6) subor = nahrada();
+    if (argc == 6) subor = nacitanieSuboru(argv[5]);
     if (subor != 0) return subor;
     Dmg *vitazPTR,vitaz={0, 0};
     vitazPTR = &vitaz;
@@ -136,7 +156,7 @@ int gamecycle(int argc,char* argv[]){
 
 int main(int argc, char *argv[]) {
     srnd(strtol(argv[3],NULL,0));
-    int c=0;
-    if (c == 0) c=gamecycle(argc,argv);
+    int c;
+    c=gamecycle(argc,argv);
     return c;
 }
